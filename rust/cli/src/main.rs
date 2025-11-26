@@ -48,6 +48,10 @@ struct Flags {
     #[arg(long)]
     no_dereference: bool,
 
+    /// Prints a summary of file types at the end of the output.
+    #[arg(long)]
+    summary: bool,
+
     #[clap(flatten)]
     colors: Colors,
 
@@ -211,12 +215,26 @@ async fn main() -> Result<()> {
     if flags.format.json {
         print!("[");
     }
+    // Initialize counter for file types
+    let mut type_counts: HashMap<String, usize> = HashMap::new();
+    // Reorder responses to match input order
     let mut reorder = Reorder::default();
     let mut errors = false;
     while let Some(response) = result_receiver.recv().await {
         reorder.push(response?);
         while let Some(response) = reorder.pop() {
             errors |= response.result.is_err();
+            // Count file type for summary
+            if flags.summary {
+                // If result is ok, extract the description (e.g., "Python source")
+                if let Ok(file_type) = &response.result {
+                    // Can change .description to .label for shorter names like "python"
+                    let label = file_type.info().description.to_string();
+                    // If the label exists, add 1. If not, insert 0 then add 1.
+                    *type_counts.entry(label).or_insert(0) += 1;
+                }
+            }
+            // Print output
             if flags.format.json {
                 if reorder.next != 1 {
                     print!(",");
@@ -235,6 +253,16 @@ async fn main() -> Result<()> {
             println!();
         }
         println!("]");
+    }
+    // Print summary if requested
+    if flags.summary && !flags.format.json && !flags.format.jsonl {
+        println!("--- Summary ---");
+        // Sort the results by count (descending)
+        let mut sorted_counts: Vec<_> = type_counts.into_iter().collect();
+        sorted_counts.sort_by(|a, b| b.1.cmp(&a.1));
+        for (label, count) in sorted_counts {
+            println!("{}: {}", label, count);
+        }
     }
     if errors {
         std::process::exit(1);
