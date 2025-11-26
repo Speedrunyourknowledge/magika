@@ -254,7 +254,10 @@ async fn main() -> Result<()> {
         }
         println!("]");
     }
-    // Print summary if requested
+    if errors {
+        std::process::exit(1);
+    }
+    // Print summary if requested, only if there were no errors
     if flags.summary && !flags.format.json && !flags.format.jsonl {
         println!("--- Summary ---");
         // Sort the results by count (descending)
@@ -263,9 +266,6 @@ async fn main() -> Result<()> {
         for (label, count) in sorted_counts {
             println!("{}: {}", label, count);
         }
-    }
-    if errors {
-        std::process::exit(1);
     }
     Ok(())
 }
