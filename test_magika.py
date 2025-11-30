@@ -2,13 +2,8 @@
 import sys
 import os
 
-# Get the absolute path to the folder containing magika.py
-# We go: current dir -> python -> src -> magika
 module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'python', 'src'))
 
-# --- THE FIX ---
-# Use insert(0, path) instead of append(path)
-# This puts your folder at the TOP of the search list
 if module_path not in sys.path:
     sys.path.insert(0, module_path)
 
