@@ -166,9 +166,9 @@ class Magika:
                 )
 
         return self._get_results_from_paths(paths_)
-
-    def scan_directory(self, directory: Union[str, os.PathLike]) -> List[MagikaResult]:
-        """Identify the content type of a all files in a directory given its path."""
+    
+    def scan_directory(self, directory: Union[str, os.PathLike], recursive_scan=False) -> List[MagikaResult]:
+        """Identify the content type of all files in a directory given its path."""
         path_obj = Path(directory)
         
         # Guard clause: check if directory exists
@@ -177,8 +177,10 @@ class Magika:
 
         collected_paths: List[Union[str, os.PathLike]] = []
 
-        # rglob('*') recursively finds all files and directories
-        for item in path_obj.rglob('*'):
+        # Use rglob('*') for recursive scan, glob('*') for single directory
+        glob_pattern = path_obj.rglob('*') if recursive_scan else path_obj.glob('*')
+        
+        for item in glob_pattern:
             # We only want files, not sub-directories themselves
             if item.is_file():
                 collected_paths.append(item)
