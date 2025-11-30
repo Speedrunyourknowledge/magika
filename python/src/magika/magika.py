@@ -167,6 +167,33 @@ class Magika:
 
         return self._get_results_from_paths(paths_)
 
+    def scan_directory(self, directory: Union[str, os.PathLike]) -> List[MagikaResult]:
+        """Identify the content type of a all files in a directory given its path."""
+        path_obj = Path(directory)
+        
+        # Guard clause: check if directory exists
+        if not path_obj.exists() or not path_obj.is_dir():
+            raise FileNotFoundError(f"The directory '{directory}' does not exist or is not a directory.")
+
+        collected_paths: List[Union[str, os.PathLike]] = []
+
+        # rglob('*') recursively finds all files and directories
+        for item in path_obj.rglob('*'):
+            # We only want files, not sub-directories themselves
+            if item.is_file():
+                collected_paths.append(item)
+
+        paths_ = []
+        for path in collected_paths:
+            if isinstance(path, str) or isinstance(path, os.PathLike):
+                paths_.append(Path(path))
+            else:
+                raise TypeError(
+                    f"Input '{path}' is invalid: input path should be of type `Union[str, os.PathLike]`"
+                )
+
+        return self._get_results_from_paths(paths_)
+
     def identify_bytes(self, content: bytes) -> MagikaResult:
         """Identify the content type of raw bytes."""
         if not isinstance(content, bytes):
