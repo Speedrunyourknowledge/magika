@@ -21,8 +21,7 @@ use std::sync::Arc;
 
 use anyhow::{bail, ensure, Result};
 use clap::{Args, Parser};
-use colored::ColoredString;
-use colored::Colorize;
+use colored::{ColoredString, Colorize};
 use magika_lib::{
     self as magika, ContentType, Features, FeaturesOrRuled, FileType, InferredType,
     OverwriteReason, Session, TypeInfo,
