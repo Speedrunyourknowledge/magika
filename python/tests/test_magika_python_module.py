@@ -76,7 +76,7 @@ def test_magika_module_with_basic_tests_by_directory() -> None:
     tests_paths = utils.get_directory_test_dir()
 
     m = Magika()
-    results = m.scan_directory(tests_paths)
+    _ = m.scan_directory(tests_paths)
 
 
 def test_magika_module_with_basic_tests_by_paths() -> None:
