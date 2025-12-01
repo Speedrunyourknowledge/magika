@@ -73,6 +73,13 @@ def test_magika_module_with_explicit_model_dir() -> None:
         _ = m.identify_stream(f)
 
 
+def test_magika_module_with_basic_tests_by_directory() -> None:
+    tests_paths = utils.get_directory_test_dir()
+
+    m = Magika()
+    _ = m.scan_directory(tests_paths)
+
+
 def test_magika_module_with_basic_tests_by_paths() -> None:
     tests_paths = utils.get_basic_test_files_paths()
 

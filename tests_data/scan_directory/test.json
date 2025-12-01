@@ -1,0 +1,31 @@
+{
+  "project": {
+    "id": 1024,
+    "name": "MagikaTest",
+    "isActive": true,
+    "tags": ["python", "cpp", "automation"],
+    "metadata": {
+      "created_at": "2023-10-27T10:00:00Z",
+      "author": "dev_user",
+      "version": 1.2
+    }
+  },
+  "employees": [
+    {
+      "id": 1,
+      "name": "Alice Smith",
+      "role": "Lead Developer",
+      "skills": ["Rust", "C++"]
+    },
+    {
+      "id": 2,
+      "name": "Bob Jones",
+      "role": "QA Engineer",
+      "skills": ["Python", "Selenium"]
+    }
+  ],
+  "settings": {
+    "retry_attempts": 5,
+    "timeout_ms": 3000
+  }
+}
