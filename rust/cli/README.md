@@ -142,6 +142,9 @@ Options:
       --no-dereference
           Identifies symbolic links as is instead of identifying their content by following them
 
+      --summary
+          Prints a summary of file types at the end of the output
+
       --colors
           Prints with colors regardless of terminal support
 
