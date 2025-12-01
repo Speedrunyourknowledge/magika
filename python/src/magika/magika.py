@@ -168,7 +168,7 @@ class Magika:
         return self._get_results_from_paths(paths_)
 
     def scan_directory(
-        self, directory: Union[str, os.PathLike], recursive_scan=False
+        self, directory: Union[str, os.PathLike], recursive_scan: bool = False
     ) -> List[MagikaResult]:
         """Identify the content type of all files in a directory given its path."""
         path_obj = Path(directory)
