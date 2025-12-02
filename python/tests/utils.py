@@ -42,8 +42,8 @@ def get_basic_tests_files_dir() -> Path:
     return tests_files_dir
 
 
-def get_directory_test_dir() -> Path:
-    tests_files_dir = get_tests_data_dir() / "scan_directory"
+def get_directory_tests_files_dir() -> Path:
+    tests_files_dir = get_tests_data_dir() / "directory"
     assert tests_files_dir.is_dir()
     return tests_files_dir
 

@@ -182,7 +182,7 @@ class Magika:
         collected_paths: List[Union[str, os.PathLike]] = []
 
         # Use rglob('*') for recursive scan, glob('*') for single directory
-        glob_pattern = path_obj.rglob("*") if recursive_scan else path_obj.glob("*")
+        glob_pattern = sorted(path_obj.rglob("*")) if recursive_scan else sorted(path_obj.glob("*"))
 
         for item in glob_pattern:
             # We only want files, not sub-directories themselves
