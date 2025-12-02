@@ -21,7 +21,7 @@ use std::sync::Arc;
 
 use anyhow::{bail, ensure, Result};
 use clap::{Args, Parser};
-use colored::ColoredString;
+use colored::{ColoredString, Colorize};
 use magika_lib::{
     self as magika, ContentType, Features, FeaturesOrRuled, FileType, InferredType,
     OverwriteReason, Session, TypeInfo,
@@ -47,6 +47,10 @@ struct Flags {
     /// Identifies symbolic links as is instead of identifying their content by following them.
     #[arg(long)]
     no_dereference: bool,
+
+    /// Prints a summary of file types at the end of the output.
+    #[arg(long)]
+    summary: bool,
 
     #[clap(flatten)]
     colors: Colors,
@@ -211,12 +215,26 @@ async fn main() -> Result<()> {
     if flags.format.json {
         print!("[");
     }
+    // Initializes counter for file types.
+    let mut type_counts: HashMap<(String, String), usize> = HashMap::new();
     let mut reorder = Reorder::default();
     let mut errors = false;
+    // Prints results, reordering as needed to match input order.
     while let Some(response) = result_receiver.recv().await {
         reorder.push(response?);
         while let Some(response) = reorder.pop() {
             errors |= response.result.is_err();
+            // Counts file type for the final summary.
+            if flags.summary {
+                // If result is ok, extracts the description (e.g., "Python source").
+                if let Ok(file_type) = &response.result {
+                    let type_label = file_type.info().description.to_string();
+                    let group = file_type.info().group.to_string();
+                    // Increments the count in the HashMap, inserting 0 if the key does not exist.
+                    *type_counts.entry((type_label, group)).or_insert(0) += 1;
+                }
+            }
+            // Prints output.
             if flags.format.json {
                 if reorder.next != 1 {
                     print!(",");
@@ -238,6 +256,25 @@ async fn main() -> Result<()> {
     }
     if errors {
         std::process::exit(1);
+    }
+    // Prints summary if requested (only if there were no errors).
+    if flags.summary && !flags.format.json && !flags.format.jsonl {
+        println!("--- Summary ---");
+        // Sorts by count (descending).
+        let mut sorted_counts: Vec<_> = type_counts.into_iter().collect();
+        sorted_counts.sort_by(|a, b| {
+            let count_cmp = b.1.cmp(&a.1);
+            if count_cmp == std::cmp::Ordering::Equal {
+                // Sorts alphabetically (case-insensitive).
+                // a.0 .0 accesses the type_label.
+                a.0 .0.to_lowercase().cmp(&b.0 .0.to_lowercase())
+            } else {
+                count_cmp
+            }
+        });
+        for ((type_label, group), count) in sorted_counts {
+            println!("{}: {}", color_type_label(&type_label, &group), count);
+        }
     }
     Ok(())
 }
@@ -554,7 +591,6 @@ impl Response {
     }
 
     fn color(&self, result: ColoredString) -> ColoredString {
-        use colored::Colorize as _;
         // We only use true colors (except for errors). If the terminal doesn't support true colors,
         // the colored crate will automatically choose the closest one.
         match &self.result {
@@ -586,4 +622,18 @@ fn join<T: AsRef<str>>(xs: impl IntoIterator<Item = T>) -> String {
     }
     result.push(']');
     result
+}
+
+fn color_type_label(type_label: &str, group: &str) -> colored::ColoredString {
+    match group {
+        "application" => type_label.truecolor(0xf4, 0x3f, 0x5e),
+        "archive" => type_label.truecolor(0xf5, 0x9e, 0x0b),
+        "audio" => type_label.truecolor(0x84, 0xcc, 0x16),
+        "code" => type_label.truecolor(0x8b, 0x5c, 0xf6),
+        "document" => type_label.truecolor(0x3b, 0x82, 0xf6),
+        "executable" => type_label.truecolor(0xec, 0x48, 0x99),
+        "image" => type_label.truecolor(0x06, 0xb6, 0xd4),
+        "video" => type_label.truecolor(0x10, 0xb9, 0x81),
+        _ => type_label.bold().truecolor(0xcc, 0xcc, 0xcc),
+    }
 }

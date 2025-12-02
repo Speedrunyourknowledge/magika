@@ -73,6 +73,23 @@ def test_magika_module_with_explicit_model_dir() -> None:
         _ = m.identify_stream(f)
 
 
+def test_magika_module_with_basic_tests_by_directory() -> None:
+    tests_paths = utils.get_directory_tests_files_dir()
+
+    m = Magika()
+
+    # Only scan direct children of tests_data/directory.
+    # Expected output is "directory" content type.
+    results = m.scan_directory(tests_paths)
+    direct_children = sorted([p for p in tests_paths.glob("*")])
+    check_results_vs_expected_results(direct_children, results)
+
+    # Scan all files recursively. Expected output is content type of each file.
+    results = m.scan_directory(tests_paths, recursive_scan=True)
+    all_files = sorted([p for p in tests_paths.rglob("*") if p.is_file()])
+    check_results_vs_expected_results(all_files, results)
+
+
 def test_magika_module_with_basic_tests_by_paths() -> None:
     tests_paths = utils.get_basic_test_files_paths()
 

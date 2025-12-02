@@ -42,6 +42,12 @@ def get_basic_tests_files_dir() -> Path:
     return tests_files_dir
 
 
+def get_directory_tests_files_dir() -> Path:
+    tests_files_dir = get_tests_data_dir() / "directory"
+    assert tests_files_dir.is_dir()
+    return tests_files_dir
+
+
 def get_mitra_tests_files_dir() -> Path:
     tests_files_dir = get_tests_data_dir() / "mitra"
     assert tests_files_dir.is_dir()
